@@ -225,23 +225,28 @@ public class PreferencesUtilsTest {
             assertEquals(recordingLayoutSrc.getFields().get(i).isPrimary(), recordingLayoutDst.getFields().get(i).isPrimary());
         }
     }
-
+    
+    private String createProfileString(String profileName, boolean useSpeedKeys) {
+        return profileName + ";2;"
+                + context.getString(R.string.stats_custom_layout_moving_time_key) + ",1,1;"
+                + context.getString(R.string.stats_custom_layout_distance_key) + ",1,1;"
+                + (useSpeedKeys
+                    ? context.getString(R.string.stats_custom_layout_average_moving_speed_key) + ",1,1;"
+                    + context.getString(R.string.stats_custom_layout_speed_key) + ",1,1;"
+                    : context.getString(R.string.stats_custom_layout_average_pace_key) + ",0,0;"
+                    + context.getString(R.string.stats_custom_layout_pace_key) + ",0,0;");
+    }
+    private String createUpdatedProfileString(String profileName) {
+        return createProfileString(profileName, false);
+    }
+    
     @Test
     public void testEditCustomLayouts() {
         // update all custom layouts
 
         // given a custom layout with two profiles
-        String cyclingProfile = "cycling;2;"
-                + context.getString(R.string.stats_custom_layout_moving_time_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_distance_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_average_moving_speed_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_speed_key) + ",1,1;";
-
-        String runningProfile = "running;2;"
-                + context.getString(R.string.stats_custom_layout_moving_time_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_distance_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_average_pace_key) + ",0,0;"
-                + context.getString(R.string.stats_custom_layout_pace_key) + ",0,0;";
+        String cyclingProfile = createProfileString("cycling", true);
+        String runningProfile = createProfileString("running", false);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -251,11 +256,8 @@ public class PreferencesUtilsTest {
         List<RecordingLayout> layoutsBefore = PreferencesUtils.getAllCustomLayouts();
 
         // when cyling profile is updated
-        String cyclingProfileUpdated = "cycling;2;"
-                + context.getString(R.string.stats_custom_layout_moving_time_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_distance_key) + ",0,0;"
-                + context.getString(R.string.stats_custom_layout_average_moving_speed_key) + ",0,0;"
-                + context.getString(R.string.stats_custom_layout_speed_key) + ",0,0;";
+        String cyclingProfileUpdated = createUpdatedProfileString("cycling");
+
 
         List<RecordingLayout> layoutsToBeUpdated = new ArrayList<>();
         layoutsToBeUpdated.add(RecordingLayoutIO.fromCsv(cyclingProfileUpdated, resources));
@@ -270,7 +272,7 @@ public class PreferencesUtilsTest {
         assertEquals(layoutsAfter.size(), 2);
 
         assertEquals(layoutsBefore.get(0).getFields().stream().filter(DataField::isVisible).count(), 4);
-        assertEquals(layoutsAfter.get(0).getFields().stream().filter(DataField::isVisible).count(), 1);
+        assertEquals(layoutsAfter.get(0).getFields().stream().filter(DataField::isVisible).count(), 2);
     }
 
     @Test
@@ -278,17 +280,8 @@ public class PreferencesUtilsTest {
         // Update only one custom layout
 
         // given a custom layout with two profiles
-        String cyclingProfile = "cycling;2;"
-                + context.getString(R.string.stats_custom_layout_moving_time_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_distance_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_average_moving_speed_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_speed_key) + ",1,1;";
-
-        String runningProfile = "running;2;"
-                + context.getString(R.string.stats_custom_layout_moving_time_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_distance_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_average_pace_key) + ",0,0;"
-                + context.getString(R.string.stats_custom_layout_pace_key) + ",0,0;";
+        String cyclingProfile = createProfileString("cycling", true);
+        String runningProfile = createProfileString("running", false);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -298,11 +291,7 @@ public class PreferencesUtilsTest {
         List<RecordingLayout> layoutsBefore = PreferencesUtils.getAllCustomLayouts();
 
         // when cyling profile is updated
-        String cyclingProfileUpdated = "cycling;2;"
-                + context.getString(R.string.stats_custom_layout_moving_time_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_distance_key) + ",0,0;"
-                + context.getString(R.string.stats_custom_layout_average_moving_speed_key) + ",0,0;"
-                + context.getString(R.string.stats_custom_layout_speed_key) + ",0,0;";
+        String cyclingProfileUpdated = createUpdatedProfileString("cycling");
         RecordingLayout recordingLayoutToBeUpdated = RecordingLayoutIO.fromCsv(cyclingProfileUpdated, resources);
         PreferencesUtils.updateCustomLayout(recordingLayoutToBeUpdated);
 
@@ -313,24 +302,15 @@ public class PreferencesUtilsTest {
         assertEquals(layoutsAfter.size(), 2);
 
         assertEquals(layoutsBefore.get(0).getFields().stream().filter(DataField::isVisible).count(), 4);
-        assertEquals(layoutsAfter.get(0).getFields().stream().filter(DataField::isVisible).count(), 1);
+        assertEquals(layoutsAfter.get(0).getFields().stream().filter(DataField::isVisible).count(), 2);
     }
 
     @Test
     public void testGetCustomLayout_whenSelectedOneNotExists() {
         // given a custom layout with two profiles and not existing custom layout selected
-        String cyclingProfile = "cycling;2;"
-                + context.getString(R.string.stats_custom_layout_moving_time_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_distance_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_average_moving_speed_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_speed_key) + ",1,1;";
-
-        String runningProfile = "running;2;"
-                + context.getString(R.string.stats_custom_layout_moving_time_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_distance_key) + ",1,1;"
-                + context.getString(R.string.stats_custom_layout_average_pace_key) + ",0,0;"
-                + context.getString(R.string.stats_custom_layout_pace_key) + ",0,0;";
-
+        String cyclingProfile = createProfileString("cycling", true);
+        String runningProfile = createProfileString("running", false);
+        
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(context.getString(R.string.stats_custom_layouts_key), cyclingProfile + "\n" + runningProfile);

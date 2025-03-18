@@ -36,6 +36,7 @@ import de.dennisguse.opentracks.ui.util.ListItemUtils;
 import de.dennisguse.opentracks.ui.util.ThemeUtils;
 import de.dennisguse.opentracks.util.IntentUtils;
 import de.dennisguse.opentracks.util.StringUtils;
+import de.dennisguse.opentracks.ui.util.SelectionUtils;
 
 public class MarkerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ActionMode.Callback {
 
@@ -134,32 +135,21 @@ public class MarkerListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         actionModeCallback.onDestroy();
     }
 
-    public void setAllSelected(boolean isSelected) {
-        if (isSelected) {
-            for (Marker marker : markers) {
-                selection.put((int) marker.getId().id(), true);
-            }
-        } else {
-            selection.clear();
-        }
+	public void setAllSelected(boolean isSelected) {
+		if (isSelected) {
+			for (Marker marker : markers) {
+				selection.put((int) marker.getId().id(), true);
+			}
+		}
 
-        for (int i = 0; i < recyclerView.getChildCount(); i++) {
-            ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
-            holder.setSelected(isSelected);
-        }
-    }
+		SelectionUtils.updateSelectionStateForVisible(recyclerView, selection, isSelected,
+				(ViewHolder holder, boolean selected) -> holder.setSelected(selected));
+	}
 
-    private long[] getCheckedIds() {
-        List<Long> ids = new ArrayList<>();
+	private long[] getCheckedIds() {
 
-        for (int i = 0; i < selection.size(); i++) {
-            if (selection.valueAt(i)) {
-                ids.add((long) selection.keyAt(i));
-            }
-        }
-
-        return ids.stream().mapToLong(i -> i).toArray();
-    }
+		return SelectionUtils.getCheckedIds(selection);
+	}
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 

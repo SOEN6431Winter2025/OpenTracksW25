@@ -54,39 +54,6 @@ public class GPXTrackExporter implements TrackExporter {
 
     private static final String TAG = GPXTrackExporter.class.getSimpleName();
 
-    private static final NumberFormat ALTITUDE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat COORDINATE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat SPEED_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat DISTANCE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat HEARTRATE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat CADENCE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat POWER_FORMAT = NumberFormat.getInstance(Locale.US);
-
-    static {
-        /*
-         * GPX readers expect to see fractional numbers with US-style punctuation.
-         * That is, they want periods for decimal points, rather than commas.
-         */
-        ALTITUDE_FORMAT.setMaximumFractionDigits(1);
-        ALTITUDE_FORMAT.setGroupingUsed(false);
-
-        COORDINATE_FORMAT.setMaximumFractionDigits(6);
-        COORDINATE_FORMAT.setMaximumIntegerDigits(3);
-        COORDINATE_FORMAT.setGroupingUsed(false);
-
-        SPEED_FORMAT.setMaximumFractionDigits(2);
-        SPEED_FORMAT.setGroupingUsed(false);
-
-        HEARTRATE_FORMAT.setMaximumFractionDigits(0);
-        HEARTRATE_FORMAT.setGroupingUsed(false);
-
-        CADENCE_FORMAT.setMaximumFractionDigits(0);
-        CADENCE_FORMAT.setGroupingUsed(false);
-
-        POWER_FORMAT.setMaximumFractionDigits(0);
-        POWER_FORMAT.setGroupingUsed(false);
-    }
-
     private final ContentProviderUtils contentProviderUtils;
 
     private final String creator;
@@ -256,7 +223,7 @@ public class GPXTrackExporter implements TrackExporter {
     public void writeMarker(ZoneOffset zoneOffset, Marker marker) {
         printWriter.println("<wpt " + formatLocation(marker.getLatitude(), marker.getLongitude()) + ">");
         if (marker.hasAltitude()) {
-            printWriter.println("<ele>" + ALTITUDE_FORMAT.format(marker.getAltitude().toM()) + "</ele>");
+            printWriter.println("<ele>" + TrackExporterUtils.ALTITUDE_FORMAT.format(marker.getAltitude().toM()) + "</ele>");
         }
         printWriter.println("<time>" + StringUtils.formatDateTimeIso8601(marker.getTime(), zoneOffset) + "</time>");
         printWriter.println("<name>" + StringUtils.formatCData(marker.getName()) + "</name>");
@@ -315,7 +282,7 @@ public class GPXTrackExporter implements TrackExporter {
         printWriter.println("<trkpt " + formatLocation(trackPoint.getLatitude(), trackPoint.getLongitude()) + ">");
 
         if (trackPoint.hasAltitude()) {
-            printWriter.println("<ele>" + ALTITUDE_FORMAT.format(trackPoint.getAltitude().toM()) + "</ele>");
+            printWriter.println("<ele>" + TrackExporterUtils.ALTITUDE_FORMAT.format(trackPoint.getAltitude().toM()) + "</ele>");
         }
 
         printWriter.println("<time>" + StringUtils.formatDateTimeIso8601(trackPoint.getTime(), zoneOffset) + "</time>");
@@ -324,42 +291,42 @@ public class GPXTrackExporter implements TrackExporter {
             String trackPointExtensionContent = "";
 
             if (trackPoint.hasSpeed()) {
-                trackPointExtensionContent += "<gpxtpx:speed>" + SPEED_FORMAT.format(trackPoint.getSpeed().toMPS()) + "</gpxtpx:speed>\n";
+                trackPointExtensionContent += "<gpxtpx:speed>" + TrackExporterUtils.SPEED_FORMAT.format(trackPoint.getSpeed().toMPS()) + "</gpxtpx:speed>\n";
             }
 
             if (trackPoint.hasHeartRate()) {
-                trackPointExtensionContent += "<gpxtpx:hr>" + HEARTRATE_FORMAT.format(trackPoint.getHeartRate().getBPM()) + "</gpxtpx:hr>\n";
+                trackPointExtensionContent += "<gpxtpx:hr>" + TrackExporterUtils.HEARTRATE_FORMAT.format(trackPoint.getHeartRate().getBPM()) + "</gpxtpx:hr>\n";
             }
 
             if (trackPoint.hasCadence()) {
-                trackPointExtensionContent += "<gpxtpx:cad>" + CADENCE_FORMAT.format(trackPoint.getCadence().getRPM()) + "</gpxtpx:cad>\n";
+                trackPointExtensionContent += "<gpxtpx:cad>" + TrackExporterUtils.CADENCE_FORMAT.format(trackPoint.getCadence().getRPM()) + "</gpxtpx:cad>\n";
             }
 
             if (trackPoint.hasPower()) {
-                trackPointExtensionContent += "<pwr:PowerInWatts>" + POWER_FORMAT.format(trackPoint.getPower().getW()) + "</pwr:PowerInWatts>\n";
+                trackPointExtensionContent += "<pwr:PowerInWatts>" + TrackExporterUtils.POWER_FORMAT.format(trackPoint.getPower().getW()) + "</pwr:PowerInWatts>\n";
             }
 
             Double cumulativeGain = cumulateSensorData(trackPoint, sensorPoints, (tp) -> tp.hasAltitudeGain() ? (double) tp.getAltitudeGain() : null);
             if (cumulativeGain != null) {
-                trackPointExtensionContent += ("<opentracks:gain>" + ALTITUDE_FORMAT.format(cumulativeGain) + "</opentracks:gain>\n");
+                trackPointExtensionContent += ("<opentracks:gain>" + TrackExporterUtils.ALTITUDE_FORMAT.format(cumulativeGain) + "</opentracks:gain>\n");
             }
 
             Double cumulativeLoss = cumulateSensorData(trackPoint, sensorPoints, (tp) -> tp.hasAltitudeLoss() ? (double) tp.getAltitudeLoss() : null);
             if (cumulativeLoss != null) {
-                trackPointExtensionContent += ("<opentracks:loss>" + ALTITUDE_FORMAT.format(cumulativeLoss) + "</opentracks:loss>\n");
+                trackPointExtensionContent += ("<opentracks:loss>" + TrackExporterUtils.ALTITUDE_FORMAT.format(cumulativeLoss) + "</opentracks:loss>\n");
             }
 
             if (trackPoint.hasHorizontalAccuracy()) {
-                trackPointExtensionContent += ("<opentracks:accuracy_horizontal>" + DISTANCE_FORMAT.format(trackPoint.getHorizontalAccuracy().toM()) + "</opentracks:accuracy_horizontal>");
+                trackPointExtensionContent += ("<opentracks:accuracy_horizontal>" + TrackExporterUtils.DISTANCE_FORMAT.format(trackPoint.getHorizontalAccuracy().toM()) + "</opentracks:accuracy_horizontal>");
             }
             if (trackPoint.hasVerticalAccuracy()) {
-                trackPointExtensionContent += ("<opentracks:accuracy_vertical>" + DISTANCE_FORMAT.format(trackPoint.getVerticalAccuracy().toM()) + "</opentracks:accuracy_vertical>");
+                trackPointExtensionContent += ("<opentracks:accuracy_vertical>" + TrackExporterUtils.DISTANCE_FORMAT.format(trackPoint.getVerticalAccuracy().toM()) + "</opentracks:accuracy_vertical>");
             }
 
             cumulativeDistance = Distance.ofOrNull(cumulateSensorData(trackPoint, sensorPoints, (tp) -> tp.hasSensorDistance() ? tp.getSensorDistance().toM() : null));
             if (cumulativeDistance != null) {
-                trackPointExtensionContent += ("<opentracks:distance>" + DISTANCE_FORMAT.format(cumulativeDistance.toM()) + "</opentracks:distance>\n");
-                trackPointExtensionContent += ("<cluetrust:distance>" + DISTANCE_FORMAT.format(trackDistance.plus(cumulativeDistance).toM()) + "</cluetrust:distance>\n");
+                trackPointExtensionContent += ("<opentracks:distance>" + TrackExporterUtils.DISTANCE_FORMAT.format(cumulativeDistance.toM()) + "</opentracks:distance>\n");
+                trackPointExtensionContent += ("<cluetrust:distance>" + TrackExporterUtils.DISTANCE_FORMAT.format(trackDistance.plus(cumulativeDistance).toM()) + "</cluetrust:distance>\n");
             }
 
             if (!trackPointExtensionContent.isEmpty()) {
@@ -386,6 +353,6 @@ public class GPXTrackExporter implements TrackExporter {
     }
 
     private String formatLocation(double latitude, double longitude) {
-        return "lat=\"" + COORDINATE_FORMAT.format(latitude) + "\" lon=\"" + COORDINATE_FORMAT.format(longitude) + "\"";
+        return "lat=\"" + TrackExporterUtils.COORDINATE_FORMAT.format(latitude) + "\" lon=\"" + TrackExporterUtils.COORDINATE_FORMAT.format(longitude) + "\"";
     }
 }

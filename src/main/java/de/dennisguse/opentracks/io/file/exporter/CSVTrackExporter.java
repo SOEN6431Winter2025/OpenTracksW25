@@ -47,38 +47,6 @@ public class CSVTrackExporter implements TrackExporter {
 
     private static final String TAG = CSVTrackExporter.class.getSimpleName();
 
-    private static final NumberFormat ALTITUDE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat COORDINATE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat SPEED_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat DISTANCE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat HEARTRATE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat CADENCE_FORMAT = NumberFormat.getInstance(Locale.US);
-    private static final NumberFormat POWER_FORMAT = NumberFormat.getInstance(Locale.US);
-
-    static {
-        ALTITUDE_FORMAT.setMaximumFractionDigits(1);
-        ALTITUDE_FORMAT.setGroupingUsed(false);
-
-        COORDINATE_FORMAT.setMaximumFractionDigits(6);
-        COORDINATE_FORMAT.setMaximumIntegerDigits(3);
-        COORDINATE_FORMAT.setGroupingUsed(false);
-
-        SPEED_FORMAT.setMaximumFractionDigits(2);
-        SPEED_FORMAT.setGroupingUsed(false);
-
-        DISTANCE_FORMAT.setMaximumFractionDigits(0);
-        DISTANCE_FORMAT.setGroupingUsed(false);
-
-        HEARTRATE_FORMAT.setMaximumFractionDigits(0);
-        HEARTRATE_FORMAT.setGroupingUsed(false);
-
-        CADENCE_FORMAT.setMaximumFractionDigits(0);
-        CADENCE_FORMAT.setGroupingUsed(false);
-
-        POWER_FORMAT.setMaximumFractionDigits(0);
-        POWER_FORMAT.setGroupingUsed(false);
-    }
-
     private final ContentProviderUtils contentProviderUtils;
 
     private PrintWriter printWriter;
@@ -92,19 +60,19 @@ public class CSVTrackExporter implements TrackExporter {
         List<Column> columns = List.of(
                 new Column("time", null),
                 new Column("trackpoint_type", t -> quote(t.getType().name())),
-                new Column("latitude", t -> t.hasLocation() ? COORDINATE_FORMAT.format(t.getLatitude()) : ""),
-                new Column("longitude", t -> t.hasLocation() ? COORDINATE_FORMAT.format(t.getLongitude()) : ""),
-                new Column("altitude", t -> t.hasAltitude() ? COORDINATE_FORMAT.format(t.getAltitude().toM()) : ""),
-                new Column("accuracy_horizontal", t -> t.hasHorizontalAccuracy() ? DISTANCE_FORMAT.format(t.getHorizontalAccuracy().toM()) : ""),
-                new Column("accuracy_vertical", t -> t.hasVerticalAccuracy() ? DISTANCE_FORMAT.format(t.getVerticalAccuracy().toM()) : ""),
-
-                new Column("speed", t -> t.hasSpeed() ? SPEED_FORMAT.format(t.getSpeed().toKMH()) : ""),
-                new Column("altitude_gain", t -> t.hasAltitudeGain() ? DISTANCE_FORMAT.format(t.getAltitudeGain()) : ""),
-                new Column("altitude_loss", t -> t.hasAltitudeLoss() ? DISTANCE_FORMAT.format(t.getAltitudeLoss()) : ""),
-                new Column("sensor_distance", t -> t.hasSensorDistance() ? DISTANCE_FORMAT.format(t.getSensorDistance().toM()) : ""),
-                new Column("heartrate", t -> t.hasHeartRate() ? HEARTRATE_FORMAT.format(t.getHeartRate().getBPM()) : ""),
-                new Column("cadence", t -> t.hasCadence() ? CADENCE_FORMAT.format(t.getCadence().getRPM()) : ""),
-                new Column("power", t -> t.hasPower() ? ALTITUDE_FORMAT.format(t.getPower().getW()) : ""));
+                new Column("latitude", t -> t.hasLocation() ? TrackExporterUtils.COORDINATE_FORMAT.format(t.getLatitude()) : ""),
+                new Column("longitude", t -> t.hasLocation() ? TrackExporterUtils.COORDINATE_FORMAT.format(t.getLongitude()) : ""),
+                new Column("altitude", t -> t.hasAltitude() ? TrackExporterUtils.ALTITUDE_FORMAT.format(t.getAltitude().toM()) : ""),
+                new Column("accuracy_horizontal", t -> t.hasHorizontalAccuracy() ? TrackExporterUtils.DISTANCE_FORMAT.format(t.getHorizontalAccuracy().toM()) : ""),
+                new Column("accuracy_vertical", t -> t.hasVerticalAccuracy() ? TrackExporterUtils.DISTANCE_FORMAT.format(t.getVerticalAccuracy().toM()) : ""),
+                new Column("speed", t -> t.hasSpeed() ? TrackExporterUtils.SPEED_FORMAT.format(t.getSpeed().toKMH()) : ""),
+                new Column("altitude_gain", t -> t.hasAltitudeGain() ? TrackExporterUtils.DISTANCE_FORMAT.format(t.getAltitudeGain()) : ""),
+                new Column("altitude_loss", t -> t.hasAltitudeLoss() ? TrackExporterUtils.DISTANCE_FORMAT.format(t.getAltitudeLoss()) : ""),
+                new Column("sensor_distance", t -> t.hasSensorDistance() ? TrackExporterUtils.DISTANCE_FORMAT.format(t.getSensorDistance().toM()) : ""),
+                new Column("heartrate", t -> t.hasHeartRate() ? TrackExporterUtils.HEARTRATE_FORMAT.format(t.getHeartRate().getBPM()) : ""),
+                new Column("cadence", t -> t.hasCadence() ? TrackExporterUtils.CADENCE_FORMAT.format(t.getCadence().getRPM()) : ""),
+                new Column("power", t -> t.hasPower() ? TrackExporterUtils.POWER_FORMAT.format(t.getPower().getW()) : "")
+        );
 
         try {
             prepare(outputStream);

@@ -88,17 +88,7 @@ public class ChartFragment extends Fragment implements TrackDataHub.Listener {
             }
 
             if (PreferencesUtils.isKey(R.string.stats_rate_key, key)) {
-                boolean reportSpeed = PreferencesUtils.isReportSpeed(activityTypeLocalized);
-                if (reportSpeed != viewBinding.chartView.getReportSpeed()) {
-                    viewBinding.chartView.setReportSpeed(reportSpeed);
-                    viewBinding.chartView.applyReportSpeed();
-
-                    runOnUiThread(() -> {
-                        if (isResumed()) {
-                            viewBinding.chartView.requestLayout();
-                        }
-                    });
-                }
+                updateReportSpeed();
             }
 
             if (PreferencesUtils.isKey(R.string.chart_display_elevation_key, key)) {
@@ -117,6 +107,15 @@ public class ChartFragment extends Fragment implements TrackDataHub.Listener {
             }
         }
     };
+
+    private void updateReportSpeed() {
+        boolean reportSpeed = PreferencesUtils.isReportSpeed(activityTypeLocalized);
+        if (reportSpeed != viewBinding.chartView.getReportSpeed()) {
+            viewBinding.chartView.setReportSpeed(reportSpeed);
+            viewBinding.chartView.applyReportSpeed();
+            refreshChart();
+        }
+    }
 
     /**
      * A runnable that will setFrequency the orange pointer as appropriate and redraw.
@@ -181,11 +180,7 @@ public class ChartFragment extends Fragment implements TrackDataHub.Listener {
             }
 
             activityTypeLocalized = track.getActivityTypeLocalized();
-            boolean reportSpeed = PreferencesUtils.isReportSpeed(activityTypeLocalized);
-            if (reportSpeed != viewBinding.chartView.getReportSpeed()) {
-                viewBinding.chartView.setReportSpeed(reportSpeed);
-                viewBinding.chartView.applyReportSpeed();
-            }
+            updateReportSpeed();
         }
     }
 

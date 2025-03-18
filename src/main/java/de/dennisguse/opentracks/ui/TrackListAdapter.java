@@ -36,6 +36,7 @@ import de.dennisguse.opentracks.ui.util.ActivityUtils;
 import de.dennisguse.opentracks.ui.util.ListItemUtils;
 import de.dennisguse.opentracks.util.IntentUtils;
 import de.dennisguse.opentracks.util.StringUtils;
+import de.dennisguse.opentracks.ui.util.SelectionUtils;
 
 public class TrackListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ActionMode.Callback {
 
@@ -131,35 +132,23 @@ public class TrackListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         actionModeCallback.onDestroy();
     }
 
-    public void setAllSelected(boolean isSelected) {
-        if (isSelected) {
-            final int idIndex = cursor.getColumnIndexOrThrow(TracksColumns._ID);
+	public void setAllSelected(boolean isSelected) {
+		if (isSelected) {
+			final int idIndex = cursor.getColumnIndexOrThrow(TracksColumns._ID);
 
-            cursor.moveToFirst();
-            do {
-                selection.put((int) cursor.getLong(idIndex), true);
-            } while (cursor.moveToNext());
-        } else {
-            selection.clear();
-        }
+			cursor.moveToFirst();
+			do {
+				selection.put((int) cursor.getLong(idIndex), true);
+			} while (cursor.moveToNext());
+		}
 
-        for (int i = 0; i < recyclerView.getChildCount(); i++) {
-            ViewHolder holder = (ViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
-            holder.setSelected(isSelected);
-        }
-    }
+		SelectionUtils.updateSelectionStateForVisible(recyclerView, selection, isSelected,
+				(ViewHolder holder, boolean selected) -> holder.setSelected(selected));
+	}
 
-    private long[] getCheckedIds() {
-        List<Long> ids = new ArrayList<>();
-
-        for (int i = 0; i < selection.size(); i++) {
-            if (selection.valueAt(i)) {
-                ids.add((long) selection.keyAt(i));
-            }
-        }
-
-        return ids.stream().mapToLong(i -> i).toArray();
-    }
+	private long[] getCheckedIds() {
+		return SelectionUtils.getCheckedIds(selection);
+	}
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 

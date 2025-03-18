@@ -55,9 +55,9 @@ import de.dennisguse.opentracks.ui.customRecordingLayout.RecordingLayoutIO;
 
 /**
  * Utilities to access preferences stored in {@link SharedPreferences}.
- *
- * @author Jimmy Shih
- */
+*
+* @author Jimmy Shih
+*/
 public class PreferencesUtils {
 
     private final static String TAG = PreferencesUtils.class.getSimpleName();
@@ -73,7 +73,7 @@ public class PreferencesUtils {
 
     /**
      * Must be called during application startup.
-     */
+    */
     public static void initPreferences(final Context context) {
         PreferencesUtils.resources = context.getResources();
         PreferencesUtils.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -104,20 +104,20 @@ public class PreferencesUtils {
 
     /**
      * Gets a preference key
-     *
-     * @param keyId the key id
-     */
+    *
+    * @param keyId the key id
+    */
     private static String getKey(int keyId) {
         return resources.getString(keyId);
     }
 
     /**
      * Compares if keyId and key belong to the same shared preference key.
-     *
-     * @param keyId The resource id of the key
-     * @param key   The key of the preference
-     * @return true if key == null or key belongs to keyId
-     */
+    *
+    * @param keyId The resource id of the key
+    * @param key   The key of the preference
+    * @return true if key == null or key belongs to keyId
+    */
     public static boolean isKey(int keyId, String key) {
         return key == null || key.equals(getKey(keyId));
     }
@@ -377,7 +377,7 @@ public class PreferencesUtils {
 
     /**
      * @return Result depends on getUnitSystem
-     */
+    */
     public static Distance getVoiceAnnouncementDistance() {
         final float DEFAULT = Integer.parseInt(resources.getString(R.string.voice_announcement_distance_default));
         float value = getFloat(R.string.voice_announcement_distance_key, DEFAULT);
@@ -386,7 +386,7 @@ public class PreferencesUtils {
 
     /**
      * @return Result depends on getUnitSystem
-     */
+    */
     static String[] getVoiceAnnouncementDistanceEntries() {
         String[] entryValues = resources.getStringArray(R.array.voice_announcement_distance_values);
         String[] entries = new String[entryValues.length];
@@ -535,11 +535,9 @@ public class PreferencesUtils {
         return Distance.of(getInt(R.string.max_recording_distance_key, MAX_RECORDING_DISTANCE));
     }
 
-    static String[] getMaxRecordingDistanceEntries() {
-        String[] entryValues = resources.getStringArray(R.array.max_recording_distance_values);
+    // helper method
+    private static String[] formatDistanceEntries(Resources resources, String[] entryValues, int defaultValue, Integer... specialValues) {
         String[] entries = new String[entryValues.length];
-
-        final int maxRecordingDistanceDefault = Integer.parseInt(resources.getString(R.string.max_recording_distance_default));
         UnitSystem unitSystem = getUnitSystem();
 
         DistanceFormatter formatter = DistanceFormatter.Builder()
@@ -547,6 +545,7 @@ public class PreferencesUtils {
                 .setThreshold(Double.MAX_VALUE)
                 .setUnit(unitSystem)
                 .build(resources);
+    
         for (int i = 0; i < entryValues.length; i++) {
             int value = Integer.parseInt(entryValues[i]);
             Distance distance = Distance.of(1).multipliedBy(value);
@@ -554,26 +553,53 @@ public class PreferencesUtils {
             String displayValue = formatter.formatDistance(distance);
             switch (unitSystem) {
                 case METRIC, IMPERIAL_METER -> {
-                    if (value == maxRecordingDistanceDefault) {
+                    if (value == defaultValue) {
                         entries[i] = resources.getString(R.string.value_integer_meter_recommended, value);
+                    } else if (specialValues.length > 0 && value == specialValues[0]) {
+                        entries[i] = resources.getString(R.string.value_integer_meter_excellent_gps, value);
+                    } else if (specialValues.length > 1 && value == specialValues[1]) {
+                        entries[i] = resources.getString(R.string.value_integer_meter_poor_gps, value);
                     } else {
+                        // for (int j = 0; j < specialValues.length; j++) {
+                        //     if (value == specialValues[j]) {
+                        //         entries[i] = resources.getString(specialStrings[j], value);
+                        //         continue;
+                        //     }
+                        // }
                         entries[i] = displayValue;
                     }
                 }
                 case IMPERIAL_FEET, NAUTICAL_IMPERIAL -> {
-                    if (value == maxRecordingDistanceDefault) {
+                    if (value == defaultValue) {
                         entries[i] = resources.getString(R.string.value_integer_feet_recommended, (int) distance.toFT());
+                    } else if (specialValues.length > 0 && value == specialValues[0]) {
+                        entries[i] = resources.getString(R.string.value_integer_feet_excellent_gps, (int) distance.toFT());
                     } else {
+                        // for (int j = 0; j < specialValues.length; j++) {
+                        //     if (value == specialValues[j]) {
+                        //         entries[i] = resources.getString(specialStrings[j], valueInFeet);
+                        //         continue;
+                        //     }
+                        // }
                         entries[i] = displayValue;
                     }
                 }
                 default -> throw new RuntimeException("Not implemented");
             }
         }
-
+    
         return entries;
     }
 
+    // change 1
+    static String[] getMaxRecordingDistanceEntries() {
+        String[] entryValues = resources.getStringArray(R.array.max_recording_distance_values);
+        int maxRecordingDistanceDefault = Integer.parseInt(resources.getString(R.string.max_recording_distance_default));
+    
+        return formatDistanceEntries(resources, entryValues, maxRecordingDistanceDefault);
+    }
+    
+    
     public static Duration getMinSamplingInterval() {
         final Duration MIN_SAMPLING_INTERVAL = getMinSamplingIntervalDefault();
         return Duration.ofSeconds(getInt(R.string.min_sampling_interval_key, (int) MIN_SAMPLING_INTERVAL.getSeconds()));
@@ -599,60 +625,20 @@ public class PreferencesUtils {
 
         return entries;
     }
-
+    // change 2
     public static Distance getThresholdHorizontalAccuracy() {
         final int RECORDING_GPS_ACCURACY = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_default));
         return Distance.of(getInt(R.string.recording_gps_accuracy_key, RECORDING_GPS_ACCURACY));
     }
-
+    
     static String[] getThresholdHorizontalAccuracyEntries() {
         String[] entryValues = resources.getStringArray(R.array.recording_gps_accuracy_values);
-        String[] entries = new String[entryValues.length];
-
-        final int recordingGPSAccuracyDefault = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_default));
-        final int recordingGPSAccuracyExcellent = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_excellent));
-        final int recordingGPSAccuracyPoor = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_poor));
-
-        UnitSystem unitSystem = getUnitSystem();
-
-        DistanceFormatter formatter = DistanceFormatter.Builder()
-                .setDecimalCount(0)
-                .setThreshold(Double.MAX_VALUE)
-                .setUnit(unitSystem)
-                .build(resources);
-
-        for (int i = 0; i < entryValues.length; i++) {
-            int value = Integer.parseInt(entryValues[i]);
-            Distance distance = Distance.of(1).multipliedBy(value);
-
-            String displayValue = formatter.formatDistance(distance);
-            switch (unitSystem) {
-                case METRIC, IMPERIAL_METER -> {
-                    if (value == recordingGPSAccuracyDefault) {
-                        entries[i] = resources.getString(R.string.value_integer_meter_recommended, value);
-                    } else if (value == recordingGPSAccuracyExcellent) {
-                        entries[i] = resources.getString(R.string.value_integer_meter_excellent_gps, value);
-                    } else if (value == recordingGPSAccuracyPoor) {
-                        entries[i] = resources.getString(R.string.value_integer_meter_poor_gps, value);
-                    } else {
-                        entries[i] = displayValue;
-                    }
-                }
-                case IMPERIAL_FEET, NAUTICAL_IMPERIAL -> {
-                    if (value == recordingGPSAccuracyDefault) {
-                        entries[i] = resources.getString(R.string.value_integer_feet_recommended, (int) distance.toFT());
-                    } else if (value == recordingGPSAccuracyExcellent) {
-                        entries[i] = resources.getString(R.string.value_integer_feet_excellent_gps, (int) distance.toFT());
-                    } else {
-                        entries[i] = displayValue;
-                    }
-                }
-                default -> throw new RuntimeException("Not implemented");
-            }
-        }
-
-        return entries;
-    }
+        int recordingGPSAccuracyDefault = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_default));
+        int recordingGPSAccuracyExcellent = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_excellent));
+        int recordingGPSAccuracyPoor = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_poor));
+    
+        return formatDistanceEntries(resources, entryValues, recordingGPSAccuracyDefault, recordingGPSAccuracyExcellent, recordingGPSAccuracyPoor);
+    }    
 
     public static Duration getIdleDurationTimeout() {
         final int DEFAULT = Integer.parseInt(resources.getString(R.string.idle_duration_default));
@@ -712,8 +698,8 @@ public class PreferencesUtils {
 
     /**
      * @return * {@link androidx.appcompat.app.AppCompatDelegate}.MODE_*
-     * * 3: Night OLED friendly
-     */
+    * * 3: Night OLED friendly
+    */
     private static String getUiMode() {
         final String defaultValue = getKey(R.string.night_mode_default);
         final String value = getString(R.string.night_mode_key, defaultValue);
@@ -814,7 +800,7 @@ public class PreferencesUtils {
 
     /**
      * @return custom layout selected or the first one if any has been selected or the one selected is not exists anymore.
-     */
+    */
     public static RecordingLayout getCustomLayout() {
         String csvCustomLayouts = getString(R.string.stats_custom_layouts_key, buildDefaultLayout());
         String[] csvLines = csvCustomLayouts.split(CsvLayoutUtils.LINE_SEPARATOR);

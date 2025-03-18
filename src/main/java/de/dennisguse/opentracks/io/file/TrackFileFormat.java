@@ -41,10 +41,31 @@ public enum TrackFileFormat {
         }
     },
 
-    @Deprecated //TODO Check if we really need this
-    KMZ_WITH_TRACKDETAIL_AND_SENSORDATA("KMZ_WITH_TRACKDETAIL_AND_SENSORDATA", false),
+    KMZ_WITH_TRACKDETAIL_AND_SENSORDATA_AND_PICTURES("KMZ_WITH_TRACKDETAIL_AND_SENSORDATA_AND_PICTURES") {
 
-    KMZ_WITH_TRACKDETAIL_AND_SENSORDATA_AND_PICTURES("KMZ_WITH_TRACKDETAIL_AND_SENSORDATA_AND_PICTURES", true),
+        private static final boolean exportPhotos = true;
+
+        @Override
+        public TrackExporter createTrackExporter(@NonNull Context context, @NonNull ContentProviderUtils contentProviderUtils) {
+            KMLTrackExporter exporter = new KMLTrackExporter(context, contentProviderUtils, exportPhotos);
+            return new KmzTrackExporter(context, contentProviderUtils, exporter, exportPhotos);
+        }
+
+        @Override
+        public String getMimeType() {
+            return MIME_KMZ;
+        }
+
+        public String getExtension() {
+            return "kmz";
+        }
+
+        @Override
+        public boolean includesPhotos() {
+            return exportPhotos;
+        }
+
+    },
 
     GPX("GPX") {
         @Override
@@ -91,27 +112,32 @@ public enum TrackFileFormat {
 
     TrackFileFormat(String preferenceId, boolean exportPhotos) {
         this.preferenceId = preferenceId;
-        this.exportPhotos = exportPhotos;
+        // this.exportPhotos = exportPhotos;
     }
 
-    public TrackExporter createTrackExporter(@NonNull Context context, @NonNull ContentProviderUtils contentProviderUtils) {
-        KMLTrackExporter exporter = new KMLTrackExporter(context, contentProviderUtils, exportPhotos);
-        return new KmzTrackExporter(context, contentProviderUtils, exporter, exportPhotos);
-    }
+    // public TrackExporter createTrackExporter(@NonNull Context context, @NonNull ContentProviderUtils contentProviderUtils) {
+    //     KMLTrackExporter exporter = new KMLTrackExporter(context, contentProviderUtils, exportPhotos);
+    //     return new KmzTrackExporter(context, contentProviderUtils, exporter, exportPhotos);
+    // }
 
-    public String getMimeType() {
-        return MIME_KMZ;
-    }
+    // public String getMimeType() {
+    //     return MIME_KMZ;
+    // }
 
 
-    public String getExtension() {
-        return "kmz";
-    }
+    // public String getExtension() {
+    //     return "kmz";
+    // }
 
-    public boolean includesPhotos() {
-        return exportPhotos;
-    }
+    // public boolean includesPhotos() {
+    //     return exportPhotos;
+    // }
 
+    // public TrackExporter createTrackExporter(@NonNull Context context, @NonNull ContentProviderUtils contentProviderUtils) {
+    //     KMLTrackExporter exporter = new KMLTrackExporter(context, contentProviderUtils, exportPhotos);
+    //     return new KmzTrackExporter(context, contentProviderUtils, exporter, exportPhotos);
+    // }
+    
     public static Map<String, String> toPreferenceIdLabelMap(final Resources resources, final TrackFileFormat ... trackFileFormats) {
         Map<String, String> preferenceIdLabelMap = new LinkedHashMap<>(trackFileFormats.length);
         for (TrackFileFormat trackFileFormat : trackFileFormats) {

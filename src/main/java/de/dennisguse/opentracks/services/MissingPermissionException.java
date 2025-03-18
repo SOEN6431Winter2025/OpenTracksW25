@@ -1,6 +1,7 @@
 package de.dennisguse.opentracks.services;
 
 import de.dennisguse.opentracks.util.PermissionRequester;
+import java.io.Serializable;
 
 public class MissingPermissionException extends RuntimeException implements Serializable {
 

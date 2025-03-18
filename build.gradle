@@ -5,8 +5,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:8.9.0"
-        classpath "org.bouncycastle:bcutil-jdk18on:1.80"
+        classpath "com.android.tools.build:gradle:8.8.0"
+        classpath "org.bouncycastle:bcutil-jdk18on:1.79"
     }
 }
 
@@ -106,6 +106,8 @@ android {
         debug {
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
+            signingConfig signingConfigs.debug
+
         }
         release {
             crunchPngs false
@@ -126,6 +128,7 @@ android {
             dimension 'version'
             applicationId 'de.dennisguse.opentracks'
             versionNameSuffix 'irreproducible'
+            
         }
         reproducible {
             // Developer Binaries: https://github.com/OpenTracksApp/OSMDashboard/releases/download/v%v/de.dennisguse.opentracks.playstore_%v.apk
@@ -164,14 +167,14 @@ android {
 }
 
 dependencies {
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
     implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation 'androidx.core:core:1.15.0'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.mediarouter:mediarouter:1.7.0'
@@ -182,7 +185,7 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.6.1'
     androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    androidTestImplementation 'org.mockito:mockito-android:5.16.0'
+    androidTestImplementation 'org.mockito:mockito-android:5.15.2'
 
     androidTestUtil 'androidx.test:orchestrator:1.5.1'
 }
